@@ -28,7 +28,7 @@
 #include <cstdlib>
 #include "gmgmp.h"
 #include <gmp.h>
-
+#include <string.h>
 
 
 template<typename A> A gm_cast(double);
@@ -58,25 +58,25 @@ template<> inline int gm_cast<int>(double d) {
 
 
 
-char * returnstring = NULL;
+  char * returnstring = NULL;
 
 void make_returnstring_base(mpz_t a, int b) {
     free((void*)returnstring);
     returnstring = (char *)(malloc(mpz_sizeinbase(a, b) + 2));
     if (returnstring == NULL) {
-	returnstring = "";
+	returnstring = strdup("");
     } else {
-	mpz_get_str(returnstring, b, a);
+	mpz_get_str((char*)returnstring, b, a);
     }
 }
 
 void make_returnstring_bin(mpz_t a) {
-    free(returnstring);
+    free((char*)returnstring);
     returnstring = (char *) (malloc(mpz_sizeinbase(a, 2) + 4));
     if (returnstring == NULL) {
-	returnstring = "";
+	returnstring = strdup("");
     } else {
-	mpz_get_str(returnstring + 2, 2, a);
+	mpz_get_str((char*)returnstring + 2, 2, a);
 	if (returnstring[2] == '-') {
 	    returnstring[0] = '-';
 	    returnstring[1] = '0';
@@ -89,20 +89,20 @@ void make_returnstring_bin(mpz_t a) {
 }
 
 void make_returnstring_dec(mpz_t a) {
-    free(returnstring);
+    free((char*)returnstring);
     returnstring = (char *) (malloc(mpz_sizeinbase(a, 10) + 2));
     if (returnstring == NULL) {
-	returnstring = "";
+	returnstring = strdup("");
     } else {
 	mpz_get_str(returnstring, 10, a);
     }
 }
 
 void make_returnstring_hex(mpz_t a) {
-    free(returnstring);
+    free((char*)returnstring);
     returnstring = (char *) (malloc(mpz_sizeinbase(a, 16) + 4));
     if (returnstring == NULL) {
-	returnstring = "";
+	returnstring = strdup("");
     } else {
 	mpz_get_str(returnstring + 2, 16, a);
 	if (returnstring[2] == '-') {
@@ -202,8 +202,8 @@ gmexport char const* gmp_div(char const* a_string, char const* b_string) {
     mpz_init_set_str(a, a_string, 0);
     mpz_init_set_str(b, b_string, 0);
     if (mpz_sgn(b) == 0) {
-	free(returnstring);
-	returnstring = "0x0";
+	free((char*)returnstring);
+	returnstring = strdup("0x0");
     } else {
 	mpz_tdiv_q(a, a, b);
 	make_returnstring_hex(a);
@@ -218,8 +218,8 @@ gmexport char const* gmp_mod(char const* a_string, char const* b_string) {
     mpz_init_set_str(a, a_string, 0);
     mpz_init_set_str(b, b_string, 0);
     if (mpz_sgn(b) == 0) {
-	free(returnstring);
-	returnstring = "0x0";
+	free((char*)returnstring);
+	returnstring = strdup("0x0");
     } else {
 	mpz_tdiv_r(a, a, b);
 	make_returnstring_hex(a);
@@ -252,8 +252,8 @@ gmexport char const* gmp_pow(char const* base_string, char const* n_string) {
     mpz_init_set_str(a, base_string, 0);
     mpz_init_set_str(b, n_string, 0);
     if (!mpz_fits_ulong_p(b)) {
-	free(returnstring);
-	returnstring = "0x0";
+	free((char*)returnstring);
+	returnstring = strdup("0x0");
     } else {
 	mpz_pow_ui(a, a, mpz_get_ui(b));
 	make_returnstring_hex(a);
@@ -269,8 +269,8 @@ gmexport char const* gmp_powmod(char const* base_string, char const* n_string, c
     mpz_init_set_str(b, n_string, 0);
     mpz_init_set_str(c, mod_string, 0);
     if (mpz_sgn(c) < 0) {
-	free(returnstring);
-	returnstring = "0x0";
+	free((char*)returnstring);
+	returnstring = strdup("0x0");
     } else {
 	mpz_powm(a, a, b, c);
 	make_returnstring_hex(a);
@@ -285,8 +285,8 @@ gmexport char const* gmp_sqrt(char const* a_string) {
     mpz_t a;
     mpz_init_set_str(a, a_string, 0);
     if (mpz_sgn(a) < 0) {
-	free(returnstring);
-	returnstring = "0x0";
+	free((char*)returnstring);
+	returnstring = strdup("0x0");
     } else {
 	mpz_sqrt(a, a);
 	make_returnstring_hex(a);
@@ -300,8 +300,8 @@ gmexport char const * gmp_sqrtrem(char const* a_string) {
     mpz_init_set_str(a, a_string, 0);
     mpz_init(b);
     if (mpz_sgn(a) < 0) {
-	free(returnstring);
-	returnstring = "0x0";
+	free((char*)returnstring);
+	returnstring = strdup("0x0");
     } else {
 	mpz_sqrtrem(a, b, a);
 	make_returnstring_hex(b);
@@ -316,8 +316,8 @@ gmexport char const * gmp_root(char const* a_string, char const* n_string) {
     mpz_init_set_str(a, a_string, 0);
     mpz_init_set_str(a, n_string, 0);
     if ((mpz_sgn(a) < 0 && mpz_even_p(b)) || !mpz_fits_ulong_p(b)) {
-	free(returnstring);
-	returnstring = "0x0";
+	free((char*)returnstring);
+	returnstring = strdup("0x0");
     } else {
 	mpz_root(a, a, mpz_get_ui(b));
 	make_returnstring_hex(a);
@@ -332,8 +332,8 @@ gmexport char const * gmp_rootrem(char const* a_string, char const* n_string) {
     mpz_init_set_str(a, a_string, 0);
     mpz_init_set_str(a, n_string, 0);
     if ((mpz_sgn(a) < 0 && mpz_even_p(b)) || !mpz_fits_ulong_p(b)) {
-	free(returnstring);
-	returnstring = "0x0";
+	free((char*)returnstring);
+	returnstring = strdup("0x0");
     } else {
 	mpz_rootrem(a, b, a, mpz_get_ui(b));
 	make_returnstring_hex(b);
@@ -430,8 +430,8 @@ gmexport char const * gmp_factorial(char const* n_string) {
     mpz_t a;
     mpz_init_set_str(a, n_string, 0);
     if (!mpz_fits_ulong_p(a)) {
-	free(returnstring);
-	returnstring = "0x0";
+	free((char*)returnstring);
+	returnstring = strdup("0x0");
     } else {
 	mpz_fac_ui(a, mpz_get_ui(a));
 	make_returnstring_hex(a);
@@ -444,8 +444,8 @@ gmexport char const  * gmp_fibonacci(char const* n_string) {
     mpz_t a;
     mpz_init_set_str(a, n_string, 0);
     if (!mpz_fits_ulong_p(a)) {
-	free(returnstring);
-	returnstring = "0x0";
+	free((char*)returnstring);
+	returnstring = strdup("0x0");
     } else {
 	mpz_fib_ui(a, mpz_get_ui(a));
 	make_returnstring_hex(a);

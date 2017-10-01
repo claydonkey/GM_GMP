@@ -65,18 +65,28 @@
 /**
  * @author Anthony Campbell contact@claydonkey.com
  */
-
-#   ifdef GMGMP_EXPORTS
+#if defined(_MSC_VER)
+  #   ifdef GMGMP_EXPORTS
 #       define gmexport __declspec(dllexport)
 #   else
 #       define gmexport __declspec(dllimport)
 #   endif
-
+#elif defined(__GNUC__)
+    //  GCC
+    #define EXPORT 
+#   ifdef GMGMP_EXPORTS
+#       define gmexport __attribute__((visibility("default")))
+#   else
+#        define gmexport
+#   endif
+#else
+    #define gmexport
+    #define gmexport
+    #pragma warning Unknown dynamic link import/export semantics.
+#endif
 #ifdef __cplusplus
 extern "C" {
     #endif
-
-
 
 void make_returnstring_base(mpz_t a, int b);
 
