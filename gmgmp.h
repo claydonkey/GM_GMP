@@ -65,36 +65,35 @@
 /**
  * @author Anthony Campbell contact@claydonkey.com
  */
-#if defined(_MSC_VER)
-  #   ifdef GMGMP_EXPORTS
-#       define gmexport __declspec(dllexport)
-#   else
-#       define gmexport __declspec(dllimport)
-#   endif
+ #if defined(_MSC_VER) || defined  (__MINGW32__)
+    #ifdef GMGMP_EXPORTS
+	#define gmexport __declspec(dllexport)
+    #else
+	#define gmexport __declspec(dllimport)
+    #endif
 #elif defined(__GNUC__)
-    //  GCC
-    #define EXPORT 
-#   ifdef GMGMP_EXPORTS
-#       define gmexport __attribute__((visibility("default")))
-#   else
-#        define gmexport
-#   endif
+    #ifdef GMGMP_EXPORTS
+	#define gmexport __attribute__((visibility("default")))
+    #else
+	#define gmexport
+    #endif
 #else
     #define gmexport
     #define gmexport
     #pragma warning Unknown dynamic link import/export semantics.
 #endif
+
 #ifdef __cplusplus
 extern "C" {
     #endif
 
-void make_returnstring_base(mpz_t a, int b);
+void make_returnstring_base(mpz_t a, int ba, char ** returnstring);
 
-void make_returnstring_bin(mpz_t a);
+void make_returnstring_bin(mpz_t a, char ** returnstring);
 
-void make_returnstring_dec(mpz_t a);
+void make_returnstring_dec(mpz_t a, char ** returnstring);
 
-void make_returnstring_hex(mpz_t a);
+void make_returnstring_hex(mpz_t a, char ** returnstring);
 
 gmexport double gmp_real(char const* a_string);
 
